@@ -1,0 +1,3 @@
+interface ImageMetadata {
+  imageId: string;
+}

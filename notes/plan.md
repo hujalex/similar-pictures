@@ -17,3 +17,14 @@
   - Images set to webp file format with quality of 60
 
 - Vectorized Database will contain metadata for each record that maps to the respective image in the Object Store
+
+**Tech Stack**
+
+- Vectorized Database - Qdrant
+- Object Store - Cloudflare R2
+- Similarity Matching - FastAPI, CLIP
+- Web App - Next js
+
+General idea of Web App
+
+- User will upload an image, immediately running the similarity matching algorithm on FastAPI Backend. Backend should return brief descriptions of matched images. If successfully, make another API call to fetch images from Cloudflare R2 Object Store

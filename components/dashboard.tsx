@@ -8,8 +8,9 @@ import { toast } from "sonner";
 
 import React, { useRef } from "react";
 import { motion } from "framer-motion";
+import { processImage } from "@/lib/actions/image.actions";
 
-export function Chat() {
+export function Dashboard() {
   const chatId = "001";
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,25 +41,33 @@ export function Chat() {
     }
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const dataUrl = e.target?.result as string;
-        setSelectedFile(dataUrl);
-        sendMessage({
-          role: "user",
-          parts: [
-            {
-              type: "image" as "text",
-              image: dataUrl,
-            },
-          ] as any,
-        });
-        toast.success("Image uploaded! Finding similar paintings...");
-      };
-      reader.readAsDataURL(file);
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    try {
+      const file = event.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const dataUrl = e.target?.result as string;
+          setSelectedFile(dataUrl);
+          // sendMessage({
+          //   role: "user",
+          //   parts: [
+          //     {
+          //       type: "image" as "text",
+          //       image: dataUrl,
+          //     },
+          //   ] as any,
+          // });
+          await processImage(dataUrl);
+          toast.success("Image uploaded! Finding similar paintings...");
+        };
+        reader.readAsDataURL(file);
+      }
+    } catch (error) {
+      console.error("Unable to Upload Image", error);
+      toast.error("Unable to Upload Image");
     }
   };
 
@@ -78,7 +87,7 @@ export function Chat() {
               linear-gradient(rgba(26,33,39,0.03) 1px, transparent 1px),
               linear-gradient(90deg, rgba(26,33,39,0.03) 1px, transparent 1px)
             `,
-            backgroundSize: '40px 40px',
+            backgroundSize: "40px 40px",
           }}
         />
       </div>
@@ -131,8 +140,18 @@ export function Chat() {
                     className="w-16 h-16 mx-auto mb-6 rounded-full bg-[#f3f5f7] flex items-center justify-center"
                     whileHover={{ scale: 1.05, backgroundColor: "#e7ebef" }}
                   >
-                    <svg className="w-8 h-8 text-[#0057a7]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    <svg
+                      className="w-8 h-8 text-[#0057a7]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+                      />
                     </svg>
                   </motion.div>
 
@@ -162,8 +181,18 @@ export function Chat() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                      />
                     </svg>
                     Upload Image
                   </motion.button>
@@ -202,8 +231,18 @@ export function Chat() {
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setSelectedFile(null)}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </motion.button>
             </div>
@@ -232,10 +271,7 @@ export function Chat() {
         {isLoading &&
           messages.length > 0 &&
           messages[messages.length - 1].role === "user" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <ThinkingMessage />
             </motion.div>
           )}
@@ -256,10 +292,10 @@ export function Chat() {
         {/* Subtle top border */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#e7ebef] to-transparent" />
 
-        <form className="relative flex mx-auto gap-2 w-full md:max-w-3xl pt-4">
+        {/* <form className="relative flex mx-auto gap-2 w-full md:max-w-3xl pt-4">
           <div className="flex-1 relative">
             {/* Clean border effect */}
-            <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-[#0057a7]/0 via-[#0057a7]/10 to-[#0057a7]/0 opacity-0 focus-within:opacity-100 transition-opacity" />
+        {/* <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-[#0057a7]/0 via-[#0057a7]/10 to-[#0057a7]/0 opacity-0 focus-within:opacity-100 transition-opacity" />
             <MultimodalInput
               chatId={chatId}
               input={input}
@@ -271,8 +307,8 @@ export function Chat() {
               setMessages={setMessages}
               sendMessage={sendMessage}
             />
-          </div>
-        </form>
+          </div> */}
+        {/* </form> */}
       </motion.div>
     </div>
   );

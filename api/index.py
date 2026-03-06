@@ -1,3 +1,6 @@
+import base64
+from io import BytesIO
+from PIL import Image
 from typing import List
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -6,6 +9,7 @@ from fastapi.responses import StreamingResponse
 from openai import OpenAI
 from .utils.prompt import ClientMessage, convert_to_openai_messages
 from .utils.stream import patch_response_with_headers, stream_text
+from .utils.image_processing import data_url_to_pillow, set_query_vector, search_image_embeddings
 from .utils.tools import AVAILABLE_TOOLS, TOOL_DEFINITIONS
 from vercel import oidc
 from vercel.headers import set_headers
@@ -37,3 +41,15 @@ async def handle_chat_data(request: Request, protocol: str = Query('data')):
         media_type="text/event-stream",
     )
     return patch_response_with_headers(response, protocol)
+
+@app.post("/api/upload-image")
+async def handle_image_data(request: Request):
+    image_data_url = request.image
+    print(image_data_url)
+    img = data_url_to_pillow(image_data_url)
+    
+    return
+    # img_query_vector set_query_vector(img)
+    # results = search_image_embeddings(img_query_vector)
+    
+     
