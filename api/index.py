@@ -42,6 +42,7 @@ async def handle_chat_data(request: Request, protocol: str = Query('data')):
     )
     return patch_response_with_headers(response, protocol)
 
+
 @app.post("/api/upload-image")
 async def handle_image_data(request: Request):
     image_data_url = request.image

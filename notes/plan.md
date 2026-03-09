@@ -27,4 +27,10 @@
 
 General idea of Web App
 
+
 - User will upload an image, immediately running the similarity matching algorithm on FastAPI Backend. Backend should return brief descriptions of matched images. If successfully, make another API call to fetch images from Cloudflare R2 Object Store
+
+
+Video
+ - Speed up development to fit in entire video and provide some general titles/labels
+

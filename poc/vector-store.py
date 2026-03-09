@@ -9,7 +9,6 @@ from tqdm import tqdm
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-import uuid
 
 load_dotenv()
 QDRANT_API_KEY = os.getenv('QDRANT_API_KEY')
@@ -26,7 +25,10 @@ EMBEDDING_DIM = 768  # CLIP ViT-L/14
 
 
 def reset_collection():
-    qdrant_client.delete_collection(COLLECTION_NAME)
+    try:
+        qdrant_client.delete_collection(COLLECTION_NAME)
+    except Exception:
+        pass  # Collection doesn't exist
     
 
 def setup_collection():
@@ -41,20 +43,20 @@ def setup_collection():
         print(f"Collection {COLLECTION_NAME} already exists")
 
 
-def process_batch(model, processor, images, metadata_batch):
+def process_batch(model, processor, device, images, metadata_batch, batch_start_idx):
     """Embed a batch of images and upload to Qdrant immediately."""
-    inputs = processor(images=images, return_tensors="pt", padding=True)
+    inputs = processor(images=images, return_tensors="pt", padding=True).to(device)
     with torch.no_grad():
         outputs = model.get_image_features(**inputs)
-    embeddings = outputs.pooler_output.detach().cpu().numpy() 
+    embeddings = outputs.pooler_output.cpu().numpy()
 
     points = [
         PointStruct(
-            id=str(uuid.uuid4()),
+            id=batch_start_idx + i,
             vector=embedding.tolist(),
             payload=metadata
         )
-        for embedding, metadata in zip(embeddings, metadata_batch)
+        for i, (embedding, metadata) in enumerate(zip(embeddings, metadata_batch))
     ]
     qdrant_client.upsert(
         collection_name=COLLECTION_NAME,
@@ -64,17 +66,20 @@ def process_batch(model, processor, images, metadata_batch):
 
 
 def process_dataset(batch_size=32):
-    model = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Using device: {device}")
+
+    model = CLIPModel.from_pretrained("openai/clip-vit-large-patch14").to(device)
     processor = CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14")
-    
+
     ds = load_dataset("huggan/wikiart", split="train")
-    
+
     print(f"Dataset size: {len(ds)}")
     print(f"Sample fields: {ds[0].keys()}")
-    
+
     reset_collection()
     setup_collection()
-    
+
     total_uploaded = 0
     images = []
     metadata_batch = []
@@ -90,12 +95,12 @@ def process_dataset(batch_size=32):
         })
 
         if len(images) >= batch_size:
-            total_uploaded += process_batch(model, processor, images, metadata_batch)
+            total_uploaded += process_batch(model, processor, device, images, metadata_batch, i - len(images) + 1)
             images = []
             metadata_batch = []
 
     if images:
-        total_uploaded += process_batch(model, processor, images, metadata_batch)
+        total_uploaded += process_batch(model, processor, device, images, metadata_batch, len(ds) - len(images))
 
     print(f"Uploaded {total_uploaded} vectors to Qdrant")
 
