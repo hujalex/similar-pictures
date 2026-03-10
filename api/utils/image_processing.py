@@ -6,7 +6,7 @@ import io
 import torch
 import numpy as np
 import boto3
-from config import qdrant_client, COLLECTION_NAME, model, processor
+from api.config import qdrant_client, COLLECTION_NAME, model, processor
 
 
 def data_url_to_pillow(data_url: str) -> Image.Image:
@@ -26,7 +26,7 @@ def search_image_embeddings(query_vector):
 def print_search_results(results):
     for res in results.points:
         print(f"Match Score: {hit.score}")
-        print(f"Image Id": {hit.payload{"image_id"}})
+        print(f"Image Id: {hit.payload['image_id']}")
         print(f"Artist: {hit.payload['artist']}")
         print(f"Genre: {hit.payload['genre']}")
         print(f"Image URL: {hit.payload['image_url']}")
@@ -42,10 +42,5 @@ def set_query_vector(img):
     with torch.no_grad():
         query_vector = model.get_image_features(**inputs).flatten().tolist()
     return query_vector
-   
-# def main():
-#     img = Image.open('uploaded-image.jpg')
-#     query_vector = set_query_vector(img)
-#     res = search(query_vector)
-#     print_search_results(res)
+
 

@@ -5,7 +5,7 @@ import boto3
 from transformers import CLIPProcessor, CLIPModel
  
 load_dotenv()
-QDRANT_URL = os.getenv('QDRANT_URL')
+QDRANT_URL = os.getenv('CLUSTER_ENDPOINT')
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 ACCOUNT_ID = os.getenv('ACCOUNT_ID')
 ACCESS_KEY_ID = os.getenv('ACCESS_KEY_ID')

@@ -34,3 +34,5 @@ General idea of Web App
 Video
  - Speed up development to fit in entire video and provide some general titles/labels
 
+Submissions
+- Before Submission, change the credentials

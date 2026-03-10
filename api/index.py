@@ -10,9 +10,11 @@ from openai import OpenAI
 from .utils.prompt import ClientMessage, convert_to_openai_messages
 from .utils.stream import patch_response_with_headers, stream_text
 from .utils.image_processing import data_url_to_pillow, set_query_vector, search_image_embeddings
+from .utils.ImageMatcher import ImageMatcher
 from .utils.tools import AVAILABLE_TOOLS, TOOL_DEFINITIONS
 from vercel import oidc
 from vercel.headers import set_headers
+from api.config import model, processor
 
 
 load_dotenv(".env.local")
@@ -30,6 +32,10 @@ class Request(BaseModel):
     messages: List[ClientMessage]
 
 
+class ImageRequest(BaseModel):
+    image: str
+
+
 @app.post("/api/chat")
 async def handle_chat_data(request: Request, protocol: str = Query('data')):
     messages = request.messages
@@ -44,13 +50,13 @@ async def handle_chat_data(request: Request, protocol: str = Query('data')):
 
 
 @app.post("/api/upload-image")
-async def handle_image_data(request: Request):
+async def handle_image_data(request: ImageRequest):
     image_data_url = request.image
-    print(image_data_url)
-    img = data_url_to_pillow(image_data_url)
-    
-    return
+    img_matcher = ImageMatcher(image_data_url, model, processor)
+    return 
+
+
     # img_query_vector set_query_vector(img)
     # results = search_image_embeddings(img_query_vector)
-    
-     
+
+
