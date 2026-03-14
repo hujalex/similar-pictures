@@ -73,6 +73,10 @@ def process_dataset(batch_size=32):
     processor = CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14")
 
     ds = load_dataset("huggan/wikiart", split="train")
+    
+    artists = ds.features['artist'].names
+    genres = ds.features['genre'].names
+    style = ds.features['style'].names
 
     print(f"Dataset size: {len(ds)}")
     print(f"Sample fields: {ds[0].keys()}")
@@ -87,12 +91,13 @@ def process_dataset(batch_size=32):
     for i in tqdm(range(len(ds)), desc="Processing images"):
         row = ds[i]
         images.append(row["image"])
-        metadata_batch.append({
-            "artist": row["artist"],
-            "genre": row["genre"],
-            "style": row["style"],
+        metadata = {
+            "artist": artists[row["artist"]],
+            "genre": genres[row["genre"]],
+            "style": style[row["style"]],
             "image_id": i,
-        })
+        }
+        metadata_batch.append(metadata)
 
         if len(images) >= batch_size:
             total_uploaded += process_batch(model, processor, device, images, metadata_batch, i - len(images) + 1)

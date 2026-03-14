@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import { processImage } from "@/lib/actions/image.actions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function Dashboard() {
   const chatId = "001";
@@ -247,6 +248,21 @@ export function Dashboard() {
               </motion.button>
             </div>
           </motion.div>
+        )}
+
+        {/* 2x5 Grid of Skeleton cards (loading state) */}
+        {selectedFile && (
+          <div className="grid grid-cols-5 gap-4 max-w-5xl mx-auto mt-8 px-4">
+            {Array.from({ length: 10 }).map((_, index) => (
+              <div
+                key={index}
+                className="relative"
+                style={{ paddingBottom: "140%" }}
+              >
+                <Skeleton className="absolute inset-0 rounded-lg" />
+              </div>
+            ))}
+          </div>
         )}
 
         {/* Messages */}
